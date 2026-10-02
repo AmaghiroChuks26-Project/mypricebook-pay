@@ -1,0 +1,1 @@
+"""MyPriceBook Pay API application."""
