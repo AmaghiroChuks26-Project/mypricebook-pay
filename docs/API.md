@@ -1,6 +1,6 @@
 # API Plan
 
-This describes the planned HTTP contract, not implemented endpoints. Keep the API versioned under `/api/v1`, use JSON for application requests/responses, and publish an OpenAPI schema from FastAPI when the backend foundation exists. Final field names and status codes should be captured in tests and the generated schema.
+This describes the planned HTTP contract and identifies the currently implemented product endpoints. Keep the API versioned under `/api/v1`, use JSON for application requests/responses, and publish an OpenAPI schema from FastAPI. Final field names and status codes should be captured in tests and the generated schema.
 
 ## Conventions
 
@@ -11,6 +11,21 @@ This describes the planned HTTP contract, not implemented endpoints. Keep the AP
 - Paginate list endpoints with bounded page size and stable ordering. Avoid returning unnecessary customer or provider payload data.
 - Use a consistent error response with a safe machine-readable code, human-readable message, optional field details, and request/correlation ID. Never include stack traces or secrets in client errors.
 - Use idempotency keys for retriable create/checkout operations where appropriate, backed by database uniqueness and documented retention.
+
+## Implemented product foundation
+
+Stage 6A implements these read-only endpoints against synthetic development data:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/v1/products` | List products; optional `search`, exact `category`, and `status` (`active` or `inactive`) filters |
+| `GET` | `/api/v1/products/{product_id}` | Fetch a product by UUID; unknown IDs use the standard API error envelope |
+
+Product responses contain a generic catalog identity (name, SKU, category, unit, and status) plus optional pharmacy-oriented descriptive fields (generic name, brand, strength, dosage form, and pack size). The optional fields allow ordinary retail products without changing the catalog contract. Pricing and stock are separate nested value objects: prices use integer kobo with currency `NGN`, and stock quantities/reorder levels are nonnegative integers. Keeping these values grouped makes their separate pricing and inventory lifecycles explicit; they are response snapshots, not database entities or a claim that stock movements are implemented.
+
+The route calls `ProductService`, which depends on the `ProductRepository` protocol. The current `InMemoryProductRepository` serves a small, immutable synthetic dataset for local development and tests only. Its sample amounts are illustrative, not claims about current medicine prices. This repository is temporary and is not production persistence; it has no PostgreSQL connection, database models, authentication, or product write endpoints.
+
+When database work is approved, add a PostgreSQL-backed implementation of the repository protocol and wire it through the service dependency. Keep product catalog data distinct from inventory balances and historical sale-price snapshots; plan any schema and migration changes in the database milestone. The public read routes and service filtering should not need to manipulate database tables directly.
 
 ## Planned endpoints
 
