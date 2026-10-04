@@ -18,11 +18,19 @@ export function EmptyState({ action, description, icon, title }: EmptyStateProps
   );
 }
 
-export function ErrorState({ onRetry }: { onRetry?: () => void }) {
+export function ErrorState({
+  description = "Check your connection and try again.",
+  onRetry,
+  title = "We couldn’t load this view.",
+}: {
+  description?: string;
+  onRetry?: () => void;
+  title?: string;
+}) {
   return (
     <div className="state-message" role="alert">
-      <strong>We couldn’t load this view.</strong>
-      <span>Check your connection and try again.</span>
+      <strong>{title}</strong>
+      <span>{description}</span>
       {onRetry && <button className="text-button" onClick={onRetry}>Try again</button>}
     </div>
   );

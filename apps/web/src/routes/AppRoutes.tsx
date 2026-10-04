@@ -4,6 +4,8 @@ import { AuthPage } from "../pages/AuthPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
 import { PlaceholderPage } from "../pages/PlaceholderPage";
+import { PriceBookPage } from "../pages/PriceBookPage";
+import { ProductDetailPage } from "../pages/ProductDetailPage";
 
 export function AppRoutes() {
   return (
@@ -15,7 +17,8 @@ export function AppRoutes() {
         <Route element={<AppShell />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/sales" element={<PlaceholderPage />} />
-          <Route path="/inventory" element={<PlaceholderPage />} />
+          <Route path="/inventory" element={<PriceBookPage />} />
+          <Route path="/inventory/:productId" element={<ProductDetailPage />} />
           <Route path="/payments" element={<PlaceholderPage />} />
           <Route path="/receipts" element={<PlaceholderPage />} />
           <Route path="/analytics" element={<PlaceholderPage />} />

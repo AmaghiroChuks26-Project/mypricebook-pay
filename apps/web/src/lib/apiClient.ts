@@ -1,3 +1,5 @@
+import type { Product, ProductListResponse, ProductStatus } from "../types";
+
 export class ApiRequestError extends Error {
   constructor(readonly status: number) {
     super(`API request failed with status ${status}`);
@@ -9,7 +11,7 @@ export async function requestJson<ResponseData>(
   path: string,
   init: RequestInit = {},
 ): Promise<ResponseData> {
-  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
+  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "/api/v1").replace(/\/+$/, "");
   const requestPath = path.replace(/^\/+/, "");
   const headers = new Headers(init.headers);
 
@@ -33,4 +35,28 @@ export async function requestJson<ResponseData>(
   }
 
   return response.json() as Promise<ResponseData>;
+}
+
+export interface ProductQueryOptions {
+  search?: string;
+  category?: string;
+  status?: ProductStatus;
+}
+
+export async function getProducts(
+  filters: ProductQueryOptions = {},
+  signal?: AbortSignal,
+): Promise<ProductListResponse> {
+  const params = new URLSearchParams();
+
+  if (filters.search) params.set("search", filters.search);
+  if (filters.category) params.set("category", filters.category);
+  if (filters.status) params.set("status", filters.status);
+
+  const query = params.toString();
+  return requestJson<ProductListResponse>(`products${query ? `?${query}` : ""}`, { signal });
+}
+
+export async function getProductById(productId: string, signal?: AbortSignal): Promise<Product> {
+  return requestJson<Product>(`products/${productId}`, { signal });
 }

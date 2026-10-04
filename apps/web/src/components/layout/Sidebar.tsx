@@ -17,7 +17,7 @@ import { demoShop } from "../../lib/demoData";
 const primaryLinks = [
   { label: "Overview", to: "/dashboard", icon: LayoutDashboard },
   { label: "Sales", to: "/sales", icon: ReceiptText },
-  { label: "Inventory", to: "/inventory", icon: Package },
+  { label: "Price Book", to: "/inventory", icon: Package },
   { label: "Payments", to: "/payments", icon: CreditCard },
   { label: "Receipts", to: "/receipts", icon: FileText },
   { label: "Analytics", to: "/analytics", icon: ChartNoAxesCombined },

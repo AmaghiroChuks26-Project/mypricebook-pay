@@ -6,7 +6,7 @@ import { Topbar } from "./Topbar";
 const pageTitles: Record<string, string> = {
   "/dashboard": "Overview",
   "/sales": "Sales",
-  "/inventory": "Inventory",
+  "/inventory": "Price Book",
   "/payments": "Payments",
   "/receipts": "Receipts",
   "/analytics": "Analytics",
@@ -17,7 +17,7 @@ const pageTitles: Record<string, string> = {
 export function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
-  const title = pageTitles[location.pathname] ?? "Overview";
+  const title = pageTitles[location.pathname] ?? (location.pathname.startsWith("/inventory") ? "Price Book" : "Overview");
 
   return (
     <div className="app-shell">

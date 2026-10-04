@@ -100,7 +100,7 @@ function LowStockPanel() {
           <p className="panel-eyebrow">NEEDS ATTENTION</p>
           <h2>Low stock <span className="heading-count">{demoLowStock.length}</span></h2>
         </div>
-        <Link className="icon-button panel-link" to="/inventory" aria-label="View all inventory">
+        <Link className="icon-button panel-link" to="/inventory" aria-label="View all price book items">
           <ArrowRight size={18} aria-hidden="true" />
         </Link>
       </div>
@@ -116,7 +116,7 @@ function LowStockPanel() {
           </li>
         ))}
       </ul>
-      <Link className="panel-footer-link" to="/inventory">View inventory <ArrowRight size={15} aria-hidden="true" /></Link>
+      <Link className="panel-footer-link" to="/inventory">View Price Book <ArrowRight size={15} aria-hidden="true" /></Link>
     </Card>
   );
 }
