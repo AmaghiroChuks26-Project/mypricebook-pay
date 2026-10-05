@@ -1,10 +1,10 @@
 from functools import lru_cache
 from uuid import UUID
 
-from app.repositories.product_repository import (
-    InMemoryProductRepository,
-    ProductRepository,
-)
+from app.core.config import get_settings
+from app.db.session import get_session_factory
+from app.repositories.product_repository import InMemoryProductRepository, ProductRepository
+from app.repositories.postgres_product_repository import PostgresProductRepository
 from app.schemas.products import (
     ProductFilters,
     ProductListResponse,
@@ -49,4 +49,9 @@ class ProductService:
 
 @lru_cache
 def get_product_service() -> ProductService:
-    return ProductService(InMemoryProductRepository())
+    settings = get_settings()
+    if settings.database_url:
+        repository: ProductRepository = PostgresProductRepository(get_session_factory())
+    else:
+        repository = InMemoryProductRepository()
+    return ProductService(repository)

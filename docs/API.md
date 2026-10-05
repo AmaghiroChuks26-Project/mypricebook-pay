@@ -14,7 +14,7 @@ This describes the planned HTTP contract and identifies the currently implemente
 
 ## Implemented product foundation
 
-Stage 6A implements these read-only endpoints against synthetic development data:
+These read-only endpoints are backed by PostgreSQL. The explicit development seed command supplies the synthetic demo records:
 
 | Method | Path | Purpose |
 | --- | --- | --- |
@@ -23,9 +23,9 @@ Stage 6A implements these read-only endpoints against synthetic development data
 
 Product responses contain a generic catalog identity (name, SKU, category, unit, and status) plus optional pharmacy-oriented descriptive fields (generic name, brand, strength, dosage form, and pack size). The optional fields allow ordinary retail products without changing the catalog contract. Pricing and stock are separate nested value objects: prices use integer kobo with currency `NGN`, and stock quantities/reorder levels are nonnegative integers. Keeping these values grouped makes their separate pricing and inventory lifecycles explicit; they are response snapshots, not database entities or a claim that stock movements are implemented.
 
-The route calls `ProductService`, which depends on the `ProductRepository` protocol. The current `InMemoryProductRepository` serves a small, immutable synthetic dataset for local development and tests only. Its sample amounts are illustrative, not claims about current medicine prices. This repository is temporary and is not production persistence; it has no PostgreSQL connection, database models, authentication, or product write endpoints.
+The route calls `ProductService`, which depends on the `ProductRepository` protocol. The normal application path uses `PostgresProductRepository`; `InMemoryProductRepository` remains available for isolated tests. Sample amounts are illustrative synthetic data, not claims about current medicine prices. The product endpoints remain read-only.
 
-When database work is approved, add a PostgreSQL-backed implementation of the repository protocol and wire it through the service dependency. Keep product catalog data distinct from inventory balances and historical sale-price snapshots; plan any schema and migration changes in the database milestone. The public read routes and service filtering should not need to manipulate database tables directly.
+The PostgreSQL schema keeps product metadata, NGN pricing (integer kobo), and inventory balances in separate related tables. The repository maps persisted records to the existing response schemas; service filters and public response shapes remain unchanged.
 
 ## Planned endpoints
 

@@ -4,15 +4,15 @@ Cloud-first pharmacy payment reconciliation and business intelligence for Nigeri
 
 ## Project status
 
-Phase 1 (architecture and repository planning) is complete. Phase 2 has established the React frontend foundation, responsive visual system, landing and account-entry pages, dashboard shell, and route placeholders. The dashboard uses clearly labelled fictional demo figures. The API, database schema, authentication, and payment integration have not been implemented. No payment or database credentials belong in source control.
+The repository includes a React frontend, a versioned FastAPI read API, and a PostgreSQL-backed product catalog. Product records and synthetic development fixtures are available to the Price Book UI. Authentication, product writes, sales, and payment integration have not been implemented. No production credentials belong in source control.
 
 ## Architecture at a glance
 
 - Frontend: React, TypeScript, Tailwind CSS, Vite, and React Router, hosted independently on a static frontend platform.
-- API: Python and FastAPI, deployed as a cloud service.
-- Data: managed PostgreSQL, accessed by the API only.
+- API: Python and FastAPI, with synchronous SQLAlchemy 2.x repositories and Alembic-managed schema changes.
+- Data: PostgreSQL, accessed by the API only. Local development uses Docker Compose; production database infrastructure is not configured here.
 - Payments: Kora checkout with server-side verification and signed webhook handling. A browser redirect is never proof of payment.
-- Development: GitHub Codespaces with no local database or Docker requirement; use a managed development database when database work begins.
+- Development: GitHub Codespaces with Docker Compose PostgreSQL for local development.
 
 The planned components and security boundaries are described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The sequence of implementation is in [docs/BUILD_PLAN.md](docs/BUILD_PLAN.md).
 
@@ -37,11 +37,22 @@ The web app is a frontend-only foundation. Demo values are fictional and live in
 
 ## Development environment
 
-Open the repository in GitHub Codespaces. The devcontainer provides a Python and Node.js toolchain and forwards the planned frontend and API ports. No PostgreSQL server is installed in the Codespace. Database-backed work will use a managed PostgreSQL instance configured with environment variables.
+Open the repository in GitHub Codespaces and rebuild the devcontainer if prompted so its Docker CLI can use the host Docker service. Copy `.env.example` to the repository-root `.env` to configure safe local-only PostgreSQL credentials. The ignored `.env` file is used by Compose and the API; never commit production secrets.
 
-Before implementation begins, copy `.env.example` to an ignored local `.env` only when needed and supply your own non-production values. Never commit `.env`, real credentials, payment secrets, or customer data. See [docs/SECURITY.md](docs/SECURITY.md) for the security plan.
+Never commit `.env`, production credentials, payment secrets, or customer data. See [docs/SECURITY.md](docs/SECURITY.md) for the security plan.
 
-Run the frontend in Codespaces:
+Start the local database, apply the product schema migration, seed synthetic products, and run the API:
+
+```bash
+cp .env.example .env
+docker compose up -d postgres
+cd apps/api
+/usr/local/bin/python -m alembic upgrade head
+/usr/local/bin/python -m app.scripts.seed_demo
+/usr/local/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+In another terminal, run the frontend:
 
 ```bash
 cd apps/web
@@ -49,7 +60,9 @@ npm install
 npm run dev
 ```
 
-The Vite server listens on port `5173`, forwarded by the Codespaces devcontainer. Run `npm run typecheck` for TypeScript validation and `npm run build` for the production build. The frontend does not require a local database, API server, or environment secrets at this phase.
+The Vite server listens on port `5173` and proxies `/api` requests to FastAPI on port `8000`. Run `npm run typecheck` for TypeScript validation and `npm run build` for the production build. Set `VITE_API_BASE_URL` only when the frontend must call a separately deployed API.
+
+The API keeps its `ProductRepository` boundary: `ProductService` depends on the protocol, and the normal application dependency uses `PostgresProductRepository`. `InMemoryProductRepository` remains available for isolated unit tests and does not back the running API. Product catalog metadata, NGN pricing in integer kobo, and stock balances live in separate related tables. Use Alembic for schema changes; the app does not create tables on startup. Database setup and test details are in [apps/api/README.md](apps/api/README.md).
 
 ## Contributions
 
